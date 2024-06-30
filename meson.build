@@ -4,4 +4,8 @@ add_project_arguments('-Wno-missing-field-initializers', language: 'cpp')
 
 subdir('src')
 
-executable('example', files('src/main.cpp') + ws_files + ws_server_files + ws_client_files, dependencies : ws_deps)
+example_files = files(
+  'src/example.cpp',
+) + ws_files + ws_server_files + ws_client_files
+
+executable('example', example_files, dependencies : ws_deps)
