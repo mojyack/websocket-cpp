@@ -14,7 +14,7 @@ struct SessionDataInitializer {
     virtual ~SessionDataInitializer() {}
 };
 
-auto on_data_received(lws* wsi, std::span<const std::byte> payload) -> void;
+using OnDataReceived = void(lws* wsi, std::span<const std::byte> payload);
 
 enum class State {
     Connected,
@@ -28,8 +28,8 @@ struct Context {
     State                  state;
 
     // set by user
-    std::function<decltype(on_data_received)> handler;
-    std::unique_ptr<SessionDataInitializer>   session_data_initer;
+    std::function<OnDataReceived>           handler;
+    std::unique_ptr<SessionDataInitializer> session_data_initer;
 
     // debug flags
     bool verbose      = false;

@@ -6,7 +6,7 @@
 #include "impl.hpp"
 
 namespace ws::client {
-auto on_data_received(std::span<const std::byte> payload) -> void;
+using OnDataReceived = void(std::span<const std::byte> payload);
 
 enum class State {
     Initialized,
@@ -28,7 +28,7 @@ struct Context {
     State                  state;
 
     // set by user
-    std::function<decltype(on_data_received)> handler;
+    std::function<OnDataReceived> handler;
 
     // debug flags
     bool verbose      = false;
