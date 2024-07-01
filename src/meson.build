@@ -19,5 +19,6 @@ if host_machine.system() == 'windows'
   cpp = meson.get_compiler('cpp')
   ws_deps += [
     cpp.find_library('ws2_32'),
+    cpp.find_library('Crypt32'),
   ]
 endif
