@@ -14,3 +14,10 @@ ws_client_files = files(
 ws_deps = [
   dependency('libwebsockets', version : '>=4.3.2'), # TODO: investigate minimal version, 4.0.20 not works
 ]
+
+if host_machine.system() == 'windows'
+  cpp = meson.get_compiler('cpp')
+  ws_deps += [
+    cpp.find_library('ws2_32'),
+  ]
+endif
