@@ -2,7 +2,6 @@
 
 #include "macros/assert.hpp"
 #include "misc.hpp"
-#include "util/assert.hpp"
 
 namespace ws {
 auto set_log_level(const uint8_t bitmap) -> void {

@@ -2,7 +2,6 @@
 
 #include "macros/unwrap.hpp"
 #include "server.hpp"
-#include "util/assert.hpp"
 
 namespace ws::server {
 namespace {

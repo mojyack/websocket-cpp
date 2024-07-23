@@ -2,7 +2,6 @@
 
 #include "client.hpp"
 #include "macros/assert.hpp"
-#include "util/assert.hpp"
 
 namespace ws::client {
 namespace {

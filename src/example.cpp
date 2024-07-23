@@ -4,7 +4,6 @@
 #include "macros/assert.hpp"
 #include "misc.hpp"
 #include "server.hpp"
-#include "util/assert.hpp"
 
 auto run() -> bool {
     ws::set_log_level(0xff);
