@@ -34,7 +34,7 @@ struct Context {
     bool verbose      = false;
     bool dump_packets = false;
 
-    auto init(const char* address, int port, const char* path, const char* protocol, SSLLevel ssl_level) -> bool;
+    auto init(const char* address, int port, const char* path, const char* protocol, const char* bind_address, SSLLevel ssl_level) -> bool;
     auto process() -> bool;
     auto shutdown() -> void;
 };

@@ -66,7 +66,7 @@ auto callback(lws* wsi, lws_callback_reasons reason, void* const /*user*/, void*
 }
 } // namespace
 
-auto Context::init(const char* address, int port, const char* path, const char* protocol, const SSLLevel ssl_level) -> bool {
+auto Context::init(const char* address, int port, const char* path, const char* protocol, const char* bind_address, const SSLLevel ssl_level) -> bool {
     const auto protocols = std::array<lws_protocols, 2>{{
         {
             .name           = protocol,
@@ -97,6 +97,7 @@ auto Context::init(const char* address, int port, const char* path, const char* 
         .host                      = build_string(address, ":", port).data(),
         .protocol                  = protocol,
         .ietf_version_or_minus_one = -1,
+        .iface                     = bind_address,
     };
     wsi = lws_client_connect_via_info(&client_connect_info);
     assert_b(wsi != NULL);
