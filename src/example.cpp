@@ -27,7 +27,13 @@ auto run() -> bool {
     client.handler      = [](std::span<const std::byte> payload) -> void {
         print("client received message: ", std::string_view((char*)payload.data(), payload.size()));
     };
-    assert_b(client.init("localhost", 8080, "/", "message", nullptr, ws::client::SSLLevel::NoSSL));
+    assert_b(client.init({
+        .address   = "localhost",
+        .path      = "/",
+        .protocol  = "message",
+        .port      = 8080,
+        .ssl_level = ws::client::SSLLevel::NoSSL,
+    }));
     auto client_thread = std::thread([&client]() -> void {
         while(client.state == ws::client::State::Connected) {
             client.process();

@@ -66,10 +66,10 @@ auto callback(lws* wsi, lws_callback_reasons reason, void* const /*user*/, void*
 }
 } // namespace
 
-auto Context::init(const char* address, int port, const char* path, const char* protocol, const char* bind_address, const SSLLevel ssl_level) -> bool {
+auto Context::init(const ContextParams& params) -> bool {
     const auto protocols = std::array<lws_protocols, 2>{{
         {
-            .name           = protocol,
+            .name           = params.protocol,
             .callback       = callback,
             .rx_buffer_size = 0x1000 * 1,
             .tx_packet_size = 0x1000 * 1,
@@ -90,14 +90,14 @@ auto Context::init(const char* address, int port, const char* path, const char* 
 
     const auto client_connect_info = lws_client_connect_info{
         .context                   = context.get(),
-        .address                   = address,
-        .port                      = port,
-        .ssl_connection            = ssl_level_to_flags(ssl_level),
-        .path                      = path,
-        .host                      = build_string(address, ":", port).data(),
-        .protocol                  = protocol,
+        .address                   = params.address,
+        .port                      = params.port,
+        .ssl_connection            = ssl_level_to_flags(params.ssl_level),
+        .path                      = params.path,
+        .host                      = build_string(params.address, ":", params.port).data(),
+        .protocol                  = params.protocol,
         .ietf_version_or_minus_one = -1,
-        .iface                     = bind_address,
+        .iface                     = params.bind_address,
     };
     wsi = lws_client_connect_via_info(&client_connect_info);
     assert_b(wsi != NULL);

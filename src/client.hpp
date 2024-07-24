@@ -20,6 +20,15 @@ enum class SSLLevel {
     NoSSL,
 };
 
+struct ContextParams {
+    const char* address;
+    const char* path;
+    const char* protocol;
+    const char* bind_address = nullptr;
+    const int   port;
+    SSLLevel    ssl_level;
+};
+
 struct Context {
     // set by library
     impl::AutoLWSContext   context;
@@ -34,7 +43,7 @@ struct Context {
     bool verbose      = false;
     bool dump_packets = false;
 
-    auto init(const char* address, int port, const char* path, const char* protocol, const char* bind_address, SSLLevel ssl_level) -> bool;
+    auto init(const ContextParams& params) -> bool;
     auto process() -> bool;
     auto shutdown() -> void;
 };
