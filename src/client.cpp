@@ -88,13 +88,14 @@ auto Context::init(const ContextParams& params) -> bool {
     context.reset(lws_create_context(&context_creation_info));
     assert_b(context.get() != NULL);
 
+    const auto host                = build_string(params.address, ":", params.port);
     const auto client_connect_info = lws_client_connect_info{
         .context                   = context.get(),
         .address                   = params.address,
         .port                      = params.port,
         .ssl_connection            = ssl_level_to_flags(params.ssl_level),
         .path                      = params.path,
-        .host                      = build_string(params.address, ":", params.port).data(),
+        .host                      = host.data(),
         .protocol                  = params.protocol,
         .ietf_version_or_minus_one = -1,
         .iface                     = params.bind_address,
