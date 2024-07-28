@@ -1,9 +1,9 @@
 #pragma once
-#include "impl.hpp"
+#include <cstdint>
+#include <span>
 
 namespace ws {
 auto set_log_level(uint8_t bitmap) -> void;
 auto dump_hex(std::span<const std::byte> data) -> void;
-auto write_back(lws* const wsi, const void* const data, size_t size) -> int;
 } // namespace ws
 

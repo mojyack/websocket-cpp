@@ -102,7 +102,7 @@ auto Context::send(lws* const wsi, std::span<const std::byte> payload) -> bool {
         PRINT("<<< ", payload.size(), " bytes:");
         dump_hex(payload);
     }
-    assert_b(size_t(write_back(wsi, payload.data(), payload.size())) == payload.size());
+    assert_b(size_t(impl::write_back(wsi, payload.data(), payload.size())) == payload.size());
     return true;
 }
 

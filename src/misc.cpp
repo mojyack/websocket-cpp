@@ -22,11 +22,4 @@ auto dump_hex(const std::span<const std::byte> data) -> void {
         printf("  |%s|\n", ascii.data());
     }
 }
-
-auto write_back(lws* const wsi, const void* const data, size_t size) -> int {
-    auto buffer       = std::vector<std::byte>(LWS_SEND_BUFFER_PRE_PADDING + size + LWS_SEND_BUFFER_POST_PADDING);
-    auto payload_head = buffer.data() + LWS_SEND_BUFFER_PRE_PADDING;
-    memcpy(payload_head, data, size);
-    return lws_write(wsi, std::bit_cast<unsigned char*>(payload_head), size, LWS_WRITE_TEXT);
-}
 } // namespace ws
