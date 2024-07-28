@@ -5,12 +5,17 @@
 #include "misc.hpp"
 #include "server.hpp"
 
+namespace {
+auto str_to_span(const std::string_view str) -> std::span<std::byte> {
+    return {(std::byte*)str.data(), str.size()};
+}
+
 auto run() -> bool {
     ws::set_log_level(0xff);
     auto server    = ws::server::Context();
-    server.handler = [](lws* wsi, std::span<const std::byte> payload) -> void {
+    server.handler = [&server](lws* wsi, std::span<const std::byte> payload) -> void {
         print("server received message: ", std::string_view((char*)payload.data(), payload.size()));
-        ws::write_back_str(wsi, "ack");
+        server.send(wsi, str_to_span("ack"));
     };
     server.verbose      = true;
     server.dump_packets = true;
@@ -41,7 +46,7 @@ auto run() -> bool {
     });
     for(auto i = 0; i < 5; i += 1) {
         const auto str = build_string("hello, ", i);
-        client.send({(std::byte*)str.data(), str.size()});
+        client.send(str_to_span(str));
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
     client.shutdown();
@@ -51,6 +56,7 @@ auto run() -> bool {
 
     return true;
 }
+} // namespace
 
 auto main() -> int {
     return run() ? 0 : 1;

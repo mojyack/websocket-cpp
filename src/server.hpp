@@ -37,6 +37,7 @@ struct Context {
 
     auto init(int port, const char* protocol) -> bool;
     auto process() -> bool;
+    auto send(lws* wsi, std::span<const std::byte> payload) -> bool;
     auto shutdown() -> void;
 };
 

@@ -1,6 +1,7 @@
 #include <libwebsockets.h>
 
 #include "macros/unwrap.hpp"
+#include "misc.hpp"
 #include "server.hpp"
 
 namespace ws::server {
@@ -23,8 +24,8 @@ auto protocol_callback(lws* const wsi, const lws_callback_reasons reason, void* 
     switch(reason) {
     case LWS_CALLBACK_RECEIVE: {
         if(ctx->dump_packets) {
-            auto str = std::string_view(std::bit_cast<char*>(in), len);
-            PRINT(">>> ", str);
+            PRINT(">>> ", len, " bytes:");
+            dump_hex({(std::byte*)in, len});
         }
         const auto payload = impl::append_payload(wsi, ctx->buffer, in, len);
         if(payload.empty()) {
@@ -93,6 +94,15 @@ auto Context::init(const int port, const char* const protocol) -> bool {
 
 auto Context::process() -> bool {
     lws_service(context.get(), 0);
+    return true;
+}
+
+auto Context::send(lws* const wsi, std::span<const std::byte> payload) -> bool {
+    if(dump_packets) {
+        PRINT("<<< ", payload.size(), " bytes:");
+        dump_hex(payload);
+    }
+    assert_b(size_t(write_back(wsi, payload.data(), payload.size())) == payload.size());
     return true;
 }
 
