@@ -17,7 +17,7 @@ auto http_callback(lws* const wsi, const lws_callback_reasons reason, void* cons
 auto protocol_callback(lws* const wsi, const lws_callback_reasons reason, void* const user, void* const in, const size_t len) -> int {
     const auto ctx = std::bit_cast<Context*>(lws_context_user(lws_get_context(wsi)));
     if(ctx->verbose) {
-        PRINT(__FUNCTION__, " reason:  ", reason);
+        PRINT("reason:  ", reason);
     }
 
     switch(reason) {
