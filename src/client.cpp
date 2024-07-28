@@ -46,8 +46,8 @@ auto callback(lws* wsi, lws_callback_reasons reason, void* const /*user*/, void*
         return -1;
     case LWS_CALLBACK_CLIENT_RECEIVE: {
         if(ctx->dump_packets) {
-            auto str = std::string_view(std::bit_cast<char*>(in));
-            PRINT(">>> ", str);
+            PRINT(">>> ", len, " bytes:");
+            dump_hex({(std::byte*)in, len});
         }
         const auto payload = impl::append_payload(wsi, ctx->buffer, in, len);
         if(payload.empty()) {
@@ -119,8 +119,8 @@ auto Context::process() -> bool {
 
 auto Context::send(const std::span<const std::byte> payload) -> bool {
     if(dump_packets) {
-        auto str = std::string_view(std::bit_cast<char*>(payload.data()), payload.size());
-        PRINT("<<<", str);
+        PRINT("<<< ", payload.size(), " bytes:");
+        dump_hex(payload);
     }
     assert_b(size_t(write_back(wsi, payload.data(), payload.size())) == payload.size());
     return true;
