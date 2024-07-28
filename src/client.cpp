@@ -20,26 +20,26 @@ auto ssl_level_to_flags(const SSLLevel level) -> int {
 auto callback(lws* wsi, lws_callback_reasons reason, void* const /*user*/, void* const in, const size_t len) -> int {
     const auto ctx = std::bit_cast<Context*>(lws_context_user(lws_get_context(wsi)));
     if(ctx->verbose) {
-        PRINT(__FUNCTION__, " reason: ", reason);
+        PRINT("reason: ", reason);
     }
 
     switch(reason) {
     case LWS_CALLBACK_CLIENT_ESTABLISHED:
         if(ctx->verbose) {
-            PRINT(__FUNCTION__, " connection established ");
+            PRINT("connection established ");
         }
         ctx->state = State::Connected;
         return 0;
     case LWS_CALLBACK_CLIENT_CONNECTION_ERROR:
         if(ctx->verbose) {
-            PRINT(__FUNCTION__, " connection error");
+            PRINT("connection error");
         }
         ctx->state = State::Destroyed;
         return -1;
     case LWS_CALLBACK_CLOSED:
     case LWS_CALLBACK_CLIENT_CLOSED:
         if(ctx->verbose) {
-            PRINT(__FUNCTION__, " connection close");
+            PRINT("connection close");
         }
         ctx->state = State::Destroyed;
         return -1;
