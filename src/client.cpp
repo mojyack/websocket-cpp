@@ -2,6 +2,7 @@
 
 #include "client.hpp"
 #include "macros/assert.hpp"
+#include "misc.hpp"
 
 namespace ws::client {
 namespace {
@@ -114,6 +115,15 @@ auto Context::init(const ContextParams& params) -> bool {
 auto Context::process() -> bool {
     lws_service(context.get(), 0);
     return state == State::Connected;
+}
+
+auto Context::send(const std::span<const std::byte> payload) -> bool {
+    if(dump_packets) {
+        auto str = std::string_view(std::bit_cast<char*>(payload.data()), payload.size());
+        PRINT("<<<", str);
+    }
+    assert_b(size_t(write_back(wsi, payload.data(), payload.size())) == payload.size());
+    return true;
 }
 
 auto Context::shutdown() -> void {

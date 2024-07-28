@@ -45,6 +45,7 @@ struct Context {
 
     auto init(const ContextParams& params) -> bool;
     auto process() -> bool;
+    auto send(std::span<const std::byte> payload) -> bool;
     auto shutdown() -> void;
 };
 } // namespace ws::client

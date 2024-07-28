@@ -40,7 +40,8 @@ auto run() -> bool {
         }
     });
     for(auto i = 0; i < 5; i += 1) {
-        ws::write_back_str(client.wsi, build_string("hello, ", i));
+        const auto str = build_string("hello, ", i);
+        client.send({(std::byte*)str.data(), str.size()});
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
     client.shutdown();
