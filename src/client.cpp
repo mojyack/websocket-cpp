@@ -79,12 +79,15 @@ auto Context::init(const ContextParams& params) -> bool {
     }};
 
     const auto context_creation_info = lws_context_creation_info{
-        .protocols = protocols.data(),
-        .port      = CONTEXT_PORT_NO_LISTEN,
-        .gid       = gid_t(-1),
-        .uid       = uid_t(-1),
-        .options   = LWS_SERVER_OPTION_DO_SSL_GLOBAL_INIT,
-        .user      = this,
+        .protocols   = protocols.data(),
+        .port        = CONTEXT_PORT_NO_LISTEN,
+        .ka_time     = 60,
+        .ka_probes   = 3,
+        .ka_interval = 5,
+        .gid         = gid_t(-1),
+        .uid         = uid_t(-1),
+        .options     = LWS_SERVER_OPTION_DO_SSL_GLOBAL_INIT,
+        .user        = this,
     };
     context.reset(lws_create_context(&context_creation_info));
     assert_b(context.get() != NULL);

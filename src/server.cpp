@@ -77,12 +77,15 @@ auto Context::init(const int port, const char* const protocol) -> bool {
     }};
 
     const auto context_creation_info = lws_context_creation_info{
-        .protocols = protocols.data(),
-        .port      = port,
-        .gid       = gid_t(-1),
-        .uid       = uid_t(-1),
-        .options   = LWS_SERVER_OPTION_DO_SSL_GLOBAL_INIT,
-        .user      = this,
+        .protocols   = protocols.data(),
+        .port        = port,
+        .ka_time     = 60,
+        .ka_probes   = 3,
+        .ka_interval = 5,
+        .gid         = gid_t(-1),
+        .uid         = uid_t(-1),
+        .options     = LWS_SERVER_OPTION_DO_SSL_GLOBAL_INIT,
+        .user        = this,
     };
     unwrap_pb_mut(lws_context, lws_create_context(&context_creation_info));
     context.reset(&lws_context);
