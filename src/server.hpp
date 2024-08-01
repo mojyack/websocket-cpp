@@ -21,6 +21,13 @@ enum class State {
     Destroyed,
 };
 
+struct ContextParams {
+    const char* protocol;
+    const char* cert        = nullptr;
+    const char* private_key = nullptr;
+    int         port;
+};
+
 struct Context {
     // set by library
     impl::AutoLWSContext   context;
@@ -35,7 +42,7 @@ struct Context {
     bool verbose      = false;
     bool dump_packets = false;
 
-    auto init(int port, const char* protocol) -> bool;
+    auto init(const ContextParams& params) -> bool;
     auto process() -> bool;
     auto send(lws* wsi, std::span<const std::byte> payload) -> bool;
     auto shutdown() -> void;

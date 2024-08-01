@@ -19,7 +19,12 @@ auto run() -> bool {
     };
     server.verbose      = true;
     server.dump_packets = true;
-    assert_b(server.init(8080, "message"));
+    assert_b(server.init({
+        .protocol    = "message",
+        .cert        = "files/localhost.cert",
+        .private_key = "files/localhost.key",
+        .port        = 8080,
+    }));
     auto server_thread = std::thread([&server]() -> void {
         while(server.state == ws::server::State::Connected) {
             server.process();
@@ -36,8 +41,9 @@ auto run() -> bool {
         .address   = "localhost",
         .path      = "/",
         .protocol  = "message",
+        .cert      = "files/localhost.cert",
         .port      = 8080,
-        .ssl_level = ws::client::SSLLevel::NoSSL,
+        .ssl_level = ws::client::SSLLevel::Unsecure,
     }));
     auto client_thread = std::thread([&client]() -> void {
         while(client.state == ws::client::State::Connected) {

@@ -57,7 +57,7 @@ auto protocol_callback(lws* const wsi, const lws_callback_reasons reason, void* 
 }
 } // namespace
 
-auto Context::init(const int port, const char* const protocol) -> bool {
+auto Context::init(const ContextParams& params) -> bool {
     const auto protocols = std::array<lws_protocols, 3>{{
         {
             .name                  = "http-only",
@@ -67,7 +67,7 @@ auto Context::init(const int port, const char* const protocol) -> bool {
             .tx_packet_size        = 0x1000 * 1,
         },
         {
-            .name                  = protocol,
+            .name                  = params.protocol,
             .callback              = protocol_callback,
             .per_session_data_size = session_data_initer ? session_data_initer->get_size() : 0,
             .rx_buffer_size        = 0x1000 * 1,
@@ -77,15 +77,17 @@ auto Context::init(const int port, const char* const protocol) -> bool {
     }};
 
     const auto context_creation_info = lws_context_creation_info{
-        .protocols   = protocols.data(),
-        .port        = port,
-        .ka_time     = 60,
-        .ka_probes   = 3,
-        .ka_interval = 5,
-        .gid         = gid_t(-1),
-        .uid         = uid_t(-1),
-        .options     = LWS_SERVER_OPTION_DO_SSL_GLOBAL_INIT,
-        .user        = this,
+        .protocols                = protocols.data(),
+        .port                     = params.port,
+        .ssl_cert_filepath        = params.cert,
+        .ssl_private_key_filepath = params.private_key,
+        .ka_time                  = 60,
+        .ka_probes                = 3,
+        .ka_interval              = 5,
+        .gid                      = gid_t(-1),
+        .uid                      = uid_t(-1),
+        .options                  = LWS_SERVER_OPTION_DO_SSL_GLOBAL_INIT,
+        .user                     = this,
     };
     unwrap_pb_mut(lws_context, lws_create_context(&context_creation_info));
     context.reset(&lws_context);
