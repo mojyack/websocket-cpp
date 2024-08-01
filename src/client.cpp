@@ -8,10 +8,10 @@ namespace ws::client {
 namespace {
 auto ssl_level_to_flags(const SSLLevel level) -> int {
     switch(level) {
-    case SSLLevel::Secure:
+    case SSLLevel::Enable:
         return LCCSCF_USE_SSL | LCCSCF_ALLOW_SELFSIGNED | LCCSCF_SKIP_SERVER_CERT_HOSTNAME_CHECK;
         break;
-    case SSLLevel::Unsecure:
+    case SSLLevel::TrustSelfSigned:
         return LCCSCF_USE_SSL;
     default:
         return 0;

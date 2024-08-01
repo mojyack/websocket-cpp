@@ -15,9 +15,9 @@ enum class State {
 };
 
 enum class SSLLevel {
-    Secure,
-    Unsecure,
-    NoSSL,
+    Enable,
+    TrustSelfSigned,
+    Disable,
 };
 
 struct ContextParams {

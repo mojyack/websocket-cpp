@@ -43,7 +43,7 @@ auto run() -> bool {
         .protocol  = "message",
         .cert      = "files/localhost.cert",
         .port      = 8080,
-        .ssl_level = ws::client::SSLLevel::Unsecure,
+        .ssl_level = ws::client::SSLLevel::TrustSelfSigned,
     }));
     auto client_thread = std::thread([&client]() -> void {
         while(client.state == ws::client::State::Connected) {
