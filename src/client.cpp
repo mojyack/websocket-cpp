@@ -9,10 +9,9 @@ namespace {
 auto ssl_level_to_flags(const SSLLevel level) -> int {
     switch(level) {
     case SSLLevel::Enable:
-        return LCCSCF_USE_SSL | LCCSCF_ALLOW_SELFSIGNED | LCCSCF_SKIP_SERVER_CERT_HOSTNAME_CHECK;
-        break;
-    case SSLLevel::TrustSelfSigned:
         return LCCSCF_USE_SSL;
+    case SSLLevel::TrustSelfSigned:
+        return LCCSCF_USE_SSL | LCCSCF_ALLOW_SELFSIGNED | LCCSCF_SKIP_SERVER_CERT_HOSTNAME_CHECK;
     default:
         return 0;
     }
