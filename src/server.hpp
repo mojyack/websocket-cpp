@@ -31,7 +31,8 @@ struct ContextParams {
 struct Context {
     // set by library
     impl::AutoLWSContext   context;
-    std::vector<std::byte> buffer;
+    std::vector<std::byte> receive_buffer;
+    impl::SendBuffers      send_buffers;
     State                  state;
 
     // set by user

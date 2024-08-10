@@ -27,17 +27,21 @@ auto protocol_callback(lws* const wsi, const lws_callback_reasons reason, void* 
             PRINT(">>> ", len, " bytes:");
             dump_hex({(std::byte*)in, len});
         }
-        const auto payload = impl::append_payload(wsi, ctx->buffer, in, len);
+        const auto payload = impl::append_payload(wsi, ctx->receive_buffer, in, len);
         if(payload.empty()) {
             return 0;
         }
         if(ctx->handler) {
             ctx->handler(wsi, payload);
         }
-        ctx->buffer.clear();
+        ctx->receive_buffer.clear();
         return 0;
     }
     case LWS_CALLBACK_SERVER_WRITEABLE:
+        if(impl::send_all_of_send_buffers(ctx->send_buffers, wsi)) {
+            PRINT("failed to send buffers");
+            return -1;
+        }
         return 0;
     case LWS_CALLBACK_ESTABLISHED:
         if(ctx->session_data_initer) {
@@ -107,7 +111,8 @@ auto Context::send(lws* const wsi, std::span<const std::byte> payload) -> bool {
         PRINT("<<< ", payload.size(), " bytes:");
         dump_hex(payload);
     }
-    assert_b(size_t(impl::write_back(wsi, payload.data(), payload.size())) == payload.size());
+    impl::push_to_send_buffers(send_buffers, payload);
+    lws_callback_on_writable(wsi);
     return true;
 }
 

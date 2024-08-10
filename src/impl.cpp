@@ -23,10 +23,21 @@ auto append_payload(lws* wsi, std::vector<std::byte>& buffer, void* const in, co
     }
 }
 
-auto write_back(lws* const wsi, const void* const data, size_t size) -> int {
-    auto buffer       = std::vector<std::byte>(LWS_SEND_BUFFER_PRE_PADDING + size + LWS_SEND_BUFFER_POST_PADDING);
-    auto payload_head = buffer.data() + LWS_SEND_BUFFER_PRE_PADDING;
-    memcpy(payload_head, data, size);
-    return lws_write(wsi, std::bit_cast<unsigned char*>(payload_head), size, LWS_WRITE_TEXT);
+auto push_to_send_buffers(SendBuffers& send_buffers, const std::span<const std::byte> payload) -> void {
+    auto buf  = std::vector<std::byte>(LWS_SEND_BUFFER_PRE_PADDING + payload.size() + LWS_SEND_BUFFER_POST_PADDING);
+    auto head = buf.data() + LWS_SEND_BUFFER_PRE_PADDING;
+    memcpy(head, payload.data(), payload.size());
+    send_buffers.push(std::move(buf));
+}
+
+auto send_all_of_send_buffers(SendBuffers& send_buffers, lws* const wsi) -> bool {
+    for(const auto& buf : send_buffers.swap()) {
+        const auto head = buf.data() + LWS_SEND_BUFFER_PRE_PADDING;
+        const auto size = buf.size() - LWS_SEND_BUFFER_PRE_PADDING - LWS_SEND_BUFFER_POST_PADDING;
+        if(lws_write(wsi, std::bit_cast<unsigned char*>(head), size, LWS_WRITE_BINARY) != int(size)) {
+            return false;
+        }
+    }
+    return true;
 }
 } // namespace ws::impl
