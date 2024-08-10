@@ -6,6 +6,10 @@
 #include "impl.hpp"
 
 namespace ws::server {
+struct SessionData {
+    impl::SendBuffers send_buffers;
+};
+
 struct SessionDataInitializer {
     virtual auto get_size() -> size_t              = 0;
     virtual auto init(void* ptr, lws* wsi) -> void = 0;
@@ -32,7 +36,6 @@ struct Context {
     // set by library
     impl::AutoLWSContext   context;
     std::vector<std::byte> receive_buffer;
-    impl::SendBuffers      send_buffers;
     State                  state;
 
     // set by user

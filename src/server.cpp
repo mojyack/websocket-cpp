@@ -37,22 +37,32 @@ auto protocol_callback(lws* const wsi, const lws_callback_reasons reason, void* 
         ctx->receive_buffer.clear();
         return 0;
     }
-    case LWS_CALLBACK_SERVER_WRITEABLE:
-        if(!impl::send_all_of_send_buffers(ctx->send_buffers, wsi)) {
+    case LWS_CALLBACK_SERVER_WRITEABLE: {
+        const auto base = (SessionData*)user;
+        if(!impl::send_all_of_send_buffers(base->send_buffers, wsi)) {
             PRINT("failed to send buffers");
             return -1;
         }
         return 0;
-    case LWS_CALLBACK_ESTABLISHED:
+    }
+    case LWS_CALLBACK_ESTABLISHED: {
+        const auto base = (SessionData*)user;
+        new(base) SessionData();
         if(ctx->session_data_initer) {
-            ctx->session_data_initer->init(user, wsi);
+            const auto ext = (std::byte*)user + sizeof(SessionData*);
+            ctx->session_data_initer->init(ext, wsi);
         }
         return 0;
-    case LWS_CALLBACK_CLOSED:
+    }
+    case LWS_CALLBACK_CLOSED: {
+        const auto base = (SessionData*)user;
+        base->~SessionData();
         if(ctx->session_data_initer) {
-            ctx->session_data_initer->deinit(user);
+            const auto ext = (std::byte*)user + sizeof(SessionData*);
+            ctx->session_data_initer->deinit(ext);
         }
         return 0;
+    }
     case LWS_CALLBACK_EVENT_WAIT_CANCELLED:
         return ctx->state == State::Destroyed ? -1 : 0;
     default:
@@ -73,7 +83,7 @@ auto Context::init(const ContextParams& params) -> bool {
         {
             .name                  = params.protocol,
             .callback              = protocol_callback,
-            .per_session_data_size = session_data_initer ? session_data_initer->get_size() : 0,
+            .per_session_data_size = sizeof(SessionData) + (session_data_initer ? session_data_initer->get_size() : 0),
             .rx_buffer_size        = 0x1000 * 1,
             .tx_packet_size        = 0x1000 * 1,
         },
@@ -111,7 +121,8 @@ auto Context::send(lws* const wsi, std::span<const std::byte> payload) -> bool {
         PRINT("<<< ", payload.size(), " bytes:");
         dump_hex(payload);
     }
-    impl::push_to_send_buffers(send_buffers, payload);
+    const auto base = (SessionData*)lws_wsi_user(wsi);
+    impl::push_to_send_buffers(base->send_buffers, payload);
     lws_callback_on_writable(wsi);
     return true;
 }
@@ -122,6 +133,6 @@ auto Context::shutdown() -> void {
 }
 
 auto wsi_to_userdata(lws* wsi) -> void* {
-    return lws_wsi_user(wsi);
+    return (std::byte*)lws_wsi_user(wsi) + sizeof(SessionData);
 }
 } // namespace ws::server
