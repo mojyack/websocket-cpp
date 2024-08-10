@@ -49,7 +49,7 @@ auto protocol_callback(lws* const wsi, const lws_callback_reasons reason, void* 
         const auto base = (SessionData*)user;
         new(base) SessionData();
         if(ctx->session_data_initer) {
-            const auto ext = (std::byte*)user + sizeof(SessionData*);
+            const auto ext = (std::byte*)user + sizeof(SessionData);
             ctx->session_data_initer->init(ext, wsi);
         }
         return 0;
@@ -58,7 +58,7 @@ auto protocol_callback(lws* const wsi, const lws_callback_reasons reason, void* 
         const auto base = (SessionData*)user;
         base->~SessionData();
         if(ctx->session_data_initer) {
-            const auto ext = (std::byte*)user + sizeof(SessionData*);
+            const auto ext = (std::byte*)user + sizeof(SessionData);
             ctx->session_data_initer->deinit(ext);
         }
         return 0;
