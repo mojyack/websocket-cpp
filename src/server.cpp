@@ -124,6 +124,7 @@ auto Context::send(lws* const wsi, std::span<const std::byte> payload) -> bool {
     const auto base = (SessionData*)lws_wsi_user(wsi);
     impl::push_to_send_buffers(base->send_buffers, payload);
     lws_callback_on_writable(wsi);
+    lws_cancel_service_pt(wsi);
     return true;
 }
 

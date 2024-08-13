@@ -134,6 +134,7 @@ auto Context::send(const std::span<const std::byte> payload) -> bool {
     }
     impl::push_to_send_buffers(send_buffers, payload);
     lws_callback_on_writable(wsi);
+    lws_cancel_service_pt(wsi);
     return true;
 }
 
