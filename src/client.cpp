@@ -20,32 +20,32 @@ auto ssl_level_to_flags(const SSLLevel level) -> int {
 auto callback(lws* wsi, lws_callback_reasons reason, void* const /*user*/, void* const in, const size_t len) -> int {
     const auto ctx = std::bit_cast<Context*>(lws_context_user(lws_get_context(wsi)));
     if(ctx->verbose) {
-        PRINT("reason: ", reason);
+        line_print("reason: ", reason);
     }
 
     switch(reason) {
     case LWS_CALLBACK_CLIENT_ESTABLISHED:
         if(ctx->verbose) {
-            PRINT("connection established ");
+            line_print("connection established ");
         }
         ctx->state = State::Connected;
         return 0;
     case LWS_CALLBACK_CLIENT_CONNECTION_ERROR:
         if(ctx->verbose) {
-            PRINT("connection error");
+            line_print("connection error");
         }
         ctx->state = State::Destroyed;
         return -1;
     case LWS_CALLBACK_CLOSED:
     case LWS_CALLBACK_CLIENT_CLOSED:
         if(ctx->verbose) {
-            PRINT("connection close");
+            line_print("connection close");
         }
         ctx->state = State::Destroyed;
         return -1;
     case LWS_CALLBACK_CLIENT_RECEIVE: {
         if(ctx->dump_packets) {
-            PRINT(">>> ", len, " bytes:");
+            line_print(">>> ", len, " bytes:");
             dump_hex({(std::byte*)in, len});
         }
         const auto payload = impl::append_payload(wsi, ctx->receive_buffer, in, len);
@@ -59,10 +59,7 @@ auto callback(lws* wsi, lws_callback_reasons reason, void* const /*user*/, void*
         return 0;
     } break;
     case LWS_CALLBACK_CLIENT_WRITEABLE: {
-        if(!impl::send_all_of_send_buffers(ctx->send_buffers, wsi)) {
-            PRINT("failed to send buffers");
-            return -1;
-        }
+        ensure(impl::send_all_of_send_buffers(ctx->send_buffers, wsi), "failed to send buffers");
         return 0;
     } break;
     case LWS_CALLBACK_EVENT_WAIT_CANCELLED:
@@ -97,7 +94,7 @@ auto Context::init(const ContextParams& params) -> bool {
         .user                   = this,
     };
     context.reset(lws_create_context(&context_creation_info));
-    assert_b(context.get() != NULL);
+    ensure(context.get() != NULL);
 
     const auto host                = build_string(params.address, ":", params.port);
     const auto client_connect_info = lws_client_connect_info{
@@ -112,7 +109,7 @@ auto Context::init(const ContextParams& params) -> bool {
         .iface                     = params.bind_address,
     };
     wsi = lws_client_connect_via_info(&client_connect_info);
-    assert_b(wsi != NULL);
+    ensure(wsi != NULL);
 
     // wait for connection
     state = State::Initialized;
@@ -129,7 +126,7 @@ auto Context::process() -> bool {
 
 auto Context::send(const std::span<const std::byte> payload) -> bool {
     if(dump_packets) {
-        PRINT("<<< ", payload.size(), " bytes:");
+        line_print("<<< ", payload.size(), " bytes:");
         dump_hex(payload);
     }
     impl::push_to_send_buffers(send_buffers, payload);

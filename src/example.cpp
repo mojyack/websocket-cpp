@@ -16,7 +16,7 @@ auto run() -> bool {
     };
     server.verbose      = true;
     server.dump_packets = true;
-    assert_b(server.init({
+    ensure(server.init({
         .protocol    = "message",
         .cert        = "files/localhost.cert",
         .private_key = "files/localhost.key",
@@ -34,7 +34,7 @@ auto run() -> bool {
     client.handler      = [](std::span<const std::byte> payload) -> void {
         print("client received message: ", std::string_view((char*)payload.data(), payload.size()));
     };
-    assert_b(client.init({
+    ensure(client.init({
         .address   = "localhost",
         .path      = "/",
         .protocol  = "message",

@@ -18,13 +18,13 @@ auto http_callback(lws* const wsi, const lws_callback_reasons reason, void* cons
 auto protocol_callback(lws* const wsi, const lws_callback_reasons reason, void* const user, void* const in, const size_t len) -> int {
     const auto ctx = std::bit_cast<Context*>(lws_context_user(lws_get_context(wsi)));
     if(ctx->verbose) {
-        PRINT("reason: ", reason);
+        line_print("reason: ", reason);
     }
 
     switch(reason) {
     case LWS_CALLBACK_RECEIVE: {
         if(ctx->dump_packets) {
-            PRINT(">>> ", len, " bytes:");
+            line_print(">>> ", len, " bytes:");
             dump_hex({(std::byte*)in, len});
         }
         const auto payload = impl::append_payload(wsi, ctx->receive_buffer, in, len);
@@ -40,7 +40,7 @@ auto protocol_callback(lws* const wsi, const lws_callback_reasons reason, void* 
     case LWS_CALLBACK_SERVER_WRITEABLE: {
         const auto base = (SessionData*)user;
         if(!impl::send_all_of_send_buffers(base->send_buffers, wsi)) {
-            PRINT("failed to send buffers");
+            line_print("failed to send buffers");
             return -1;
         }
         return 0;
@@ -103,7 +103,7 @@ auto Context::init(const ContextParams& params) -> bool {
         .options                  = LWS_SERVER_OPTION_DO_SSL_GLOBAL_INIT,
         .user                     = this,
     };
-    unwrap_pb_mut(lws_context, lws_create_context(&context_creation_info));
+    unwrap_mut(lws_context, lws_create_context(&context_creation_info));
     context.reset(&lws_context);
 
     state = State::Connected;
@@ -118,7 +118,7 @@ auto Context::process() -> bool {
 
 auto Context::send(lws* const wsi, std::span<const std::byte> payload) -> bool {
     if(dump_packets) {
-        PRINT("<<< ", payload.size(), " bytes:");
+        line_print("<<< ", payload.size(), " bytes:");
         dump_hex(payload);
     }
     const auto base = (SessionData*)lws_wsi_user(wsi);
