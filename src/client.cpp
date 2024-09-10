@@ -36,7 +36,6 @@ auto callback(lws* wsi, lws_callback_reasons reason, void* const /*user*/, void*
         }
         ctx->state = State::Destroyed;
         return -1;
-    case LWS_CALLBACK_CLOSED:
     case LWS_CALLBACK_CLIENT_CLOSED:
         if(ctx->verbose) {
             line_print("connection close");
