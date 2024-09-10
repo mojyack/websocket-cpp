@@ -65,6 +65,9 @@ auto protocol_callback(lws* const wsi, const lws_callback_reasons reason, void* 
     }
     case LWS_CALLBACK_EVENT_WAIT_CANCELLED:
         return ctx->state == State::Destroyed ? -1 : 0;
+    case LWS_CALLBACK_WSI_DESTROY:
+        lws_cancel_service_pt(wsi);
+        return 0;
     default:
         return 0;
     }
