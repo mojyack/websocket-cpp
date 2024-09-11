@@ -26,7 +26,7 @@ struct ContextParams {
     const char* protocol;
     const char* cert         = nullptr;
     const char* bind_address = nullptr;
-    const int   port;
+    int         port;
     SSLLevel    ssl_level;
 };
 
