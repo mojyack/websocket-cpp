@@ -30,6 +30,8 @@ struct ContextParams {
     const char* cert        = nullptr;
     const char* private_key = nullptr;
     int         port;
+    uint16_t    connection_check_interval   = 60; // interval between ping packets in seconds
+    uint16_t    connection_invalidate_delay = 10; // delay between last pong packet and hangup in seconds
 };
 
 struct Context {
