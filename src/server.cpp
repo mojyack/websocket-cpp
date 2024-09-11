@@ -93,20 +93,18 @@ auto Context::init(const ContextParams& params) -> bool {
         {},
     }};
 
-    const auto retry_policy = lws_retry_bo_t{
-        .secs_since_valid_ping   = params.connection_check_interval,
-        .secs_since_valid_hangup = uint16_t(params.connection_check_interval + params.connection_invalidate_delay),
-    };
     const auto context_creation_info = lws_context_creation_info{
         .protocols                = protocols.data(),
         .port                     = params.port,
         .ssl_cert_filepath        = params.cert,
         .ssl_private_key_filepath = params.private_key,
+        .ka_time                  = params.keepalive.time,
+        .ka_probes                = params.keepalive.probes,
+        .ka_interval              = params.keepalive.interval,
         .gid                      = gid_t(-1),
         .uid                      = uid_t(-1),
         .options                  = LWS_SERVER_OPTION_DO_SSL_GLOBAL_INIT,
         .user                     = this,
-        .retry_and_idle_policy    = &retry_policy,
     };
     unwrap_mut(lws_context, lws_create_context(&context_creation_info));
     context.reset(&lws_context);

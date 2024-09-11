@@ -3,6 +3,7 @@
 #include <span>
 #include <vector>
 
+#include "common.hpp"
 #include "impl.hpp"
 
 namespace ws::client {
@@ -21,15 +22,14 @@ enum class SSLLevel {
 };
 
 struct ContextParams {
-    const char* address;
-    const char* path;
-    const char* protocol;
-    const char* cert         = nullptr;
-    const char* bind_address = nullptr;
-    int         port;
-    SSLLevel    ssl_level;
-    uint16_t    connection_check_interval   = 60; // interval between ping packets in seconds
-    uint16_t    connection_invalidate_delay = 10; // delay between last pong packet and hangup in seconds
+    const char*     address;
+    const char*     path;
+    const char*     protocol;
+    const char*     cert         = nullptr;
+    const char*     bind_address = nullptr;
+    int             port;
+    SSLLevel        ssl_level;
+    KeepAliveParams keepalive = {};
 };
 
 struct Context {
