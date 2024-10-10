@@ -6,6 +6,10 @@
 
 namespace ws::server {
 namespace {
+struct SessionData {
+    impl::SendBuffers send_buffers;
+};
+
 auto http_callback(lws* const wsi, const lws_callback_reasons reason, void* const /*user*/, void* const /*in*/, const size_t /*len*/) -> int {
     switch(reason) {
     case LWS_CALLBACK_HTTP:
