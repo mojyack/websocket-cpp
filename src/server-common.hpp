@@ -5,11 +5,12 @@
 #include "impl.hpp"
 
 namespace ws::server {
-struct SessionDataInitializer {
-    virtual auto alloc(lws* wsi) -> void* = 0;
-    virtual auto free(void* ptr) -> void  = 0;
+template <class T>
+struct SessionDataInitializerCommon {
+    virtual auto alloc(T* session) -> void* = 0;
+    virtual auto free(void* ptr) -> void    = 0;
 
-    virtual ~SessionDataInitializer() {}
+    virtual ~SessionDataInitializerCommon() {}
 };
 
 enum class State {

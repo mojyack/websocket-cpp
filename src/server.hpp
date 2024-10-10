@@ -2,7 +2,8 @@
 #include "server-common.hpp"
 
 namespace ws::server {
-using OnDataReceived = void(lws* wsi, std::span<const std::byte> payload);
+using SessionDataInitializer = SessionDataInitializerCommon<lws>;
+using OnDataReceived         = void(lws* wsi, std::span<const std::byte> payload);
 
 struct Context : ContextCommon {
     // public
