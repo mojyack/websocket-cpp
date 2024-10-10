@@ -7,6 +7,7 @@
 namespace ws::server {
 namespace {
 struct SessionData {
+    void*             user_data = nullptr;
     impl::SendBuffers send_buffers;
 };
 
@@ -50,18 +51,16 @@ auto protocol_callback(lws* const wsi, const lws_callback_reasons reason, void* 
         const auto base = (SessionData*)user;
         new(base) SessionData();
         if(ctx->session_data_initer) {
-            const auto ext = (std::byte*)user + sizeof(SessionData);
-            ctx->session_data_initer->init(ext, wsi);
+            base->user_data = ctx->session_data_initer->alloc(wsi);
         }
         return 0;
     }
     case LWS_CALLBACK_CLOSED: {
         const auto base = (SessionData*)user;
-        base->~SessionData();
-        if(ctx->session_data_initer) {
-            const auto ext = (std::byte*)user + sizeof(SessionData);
-            ctx->session_data_initer->deinit(ext);
+        if(base->user_data != nullptr) {
+            ctx->session_data_initer->free(base->user_data);
         }
+        base->~SessionData();
         return 0;
     }
     case LWS_CALLBACK_EVENT_WAIT_CANCELLED:
@@ -87,7 +86,7 @@ auto Context::init(const ContextParams& params) -> bool {
         {
             .name                  = params.protocol,
             .callback              = protocol_callback,
-            .per_session_data_size = sizeof(SessionData) + (session_data_initer ? session_data_initer->get_size() : 0),
+            .per_session_data_size = sizeof(SessionData),
             .rx_buffer_size        = 0x1000 * 1,
             .tx_packet_size        = 0x1000 * 1,
         },
@@ -137,7 +136,13 @@ auto Context::shutdown() -> void {
     lws_cancel_service(context.get());
 }
 
+Context::~Context() {
+    // delete context explicitly before destructing other fields
+    // because lws_context_destroy may call protocol_callback
+    context.reset();
+}
+
 auto wsi_to_userdata(lws* wsi) -> void* {
-    return (std::byte*)lws_wsi_user(wsi) + sizeof(SessionData);
+    return ((SessionData*)lws_wsi_user(wsi))->user_data;
 }
 } // namespace ws::server

@@ -8,9 +8,8 @@
 
 namespace ws::server {
 struct SessionDataInitializer {
-    virtual auto get_size() -> size_t              = 0;
-    virtual auto init(void* ptr, lws* wsi) -> void = 0;
-    virtual auto deinit(void* ptr) -> void         = 0;
+    virtual auto alloc(lws* wsi) -> void* = 0;
+    virtual auto free(void* ptr) -> void  = 0;
 
     virtual ~SessionDataInitializer() {}
 };
@@ -48,6 +47,8 @@ struct Context {
     auto process() -> bool;
     auto send(lws* wsi, std::span<const std::byte> payload) -> bool;
     auto shutdown() -> void;
+
+    ~Context();
 };
 
 auto wsi_to_userdata(lws* wsi) -> void*;
