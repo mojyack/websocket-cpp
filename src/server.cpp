@@ -43,10 +43,7 @@ auto protocol_callback(lws* const wsi, const lws_callback_reasons reason, void* 
     }
     case LWS_CALLBACK_SERVER_WRITEABLE: {
         const auto base = (SessionData*)user;
-        if(!impl::send_all_of_send_buffers(base->send_buffers, wsi)) {
-            line_print("failed to send buffers");
-            return -1;
-        }
+        ensure(impl::send_all_of_send_buffers(base->send_buffers, wsi), "failed to send buffers");
         return 0;
     }
     case LWS_CALLBACK_ESTABLISHED: {
