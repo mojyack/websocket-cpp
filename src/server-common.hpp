@@ -1,6 +1,4 @@
 #pragma once
-#include <functional>
-#include <span>
 #include <vector>
 
 #include "common.hpp"
