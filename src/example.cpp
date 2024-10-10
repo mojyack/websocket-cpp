@@ -7,26 +7,67 @@
 #include "util/span.hpp"
 
 namespace {
-auto run() -> bool {
-    ws::set_log_level(0xff);
-    auto server    = ws::server::Context();
-    server.handler = [&server](lws* wsi, std::span<const std::byte> payload) -> void {
+namespace server {
+struct SessionData {
+    int    a;
+    size_t b;
+    bool   c;
+};
+
+struct SessionDataInitializer : ws::server::SessionDataInitializer {
+    auto alloc(lws* /*wsi*/) -> void* override {
+        return new SessionData{.a = -1, .b = 0, .c = true};
+    }
+
+    auto free(void* const ptr) -> void override {
+        delete(SessionData*)ptr;
+    }
+};
+
+struct Server {
+    ws::server::Context websocket_context;
+    std::thread         worker_thread;
+
+    auto init() -> bool;
+    auto stop() -> void;
+};
+
+auto Server::init() -> bool {
+    websocket_context.handler = [this](lws* wsi, std::span<const std::byte> payload) -> void {
+        auto& session = *std::bit_cast<SessionData*>(ws::server::wsi_to_userdata(wsi));
         print("server received message: ", std::string_view((char*)payload.data(), payload.size()));
-        server.send(wsi, to_span("ack"));
+        print("session: a=", session.a, " b=", session.b, " c=", session.c);
+        websocket_context.send(wsi, to_span("ack"));
     };
-    server.verbose      = true;
-    server.dump_packets = true;
-    ensure(server.init({
+    websocket_context.session_data_initer.reset(new SessionDataInitializer());
+    websocket_context.verbose      = true;
+    websocket_context.dump_packets = true;
+    ensure(websocket_context.init({
         .protocol    = "message",
         .cert        = "files/localhost.cert",
         .private_key = "files/localhost.key",
         .port        = 8080,
     }));
-    auto server_thread = std::thread([&server]() -> void {
-        while(server.state == ws::server::State::Connected) {
-            server.process();
+
+    worker_thread = std::thread([this]() -> void {
+        while(websocket_context.state == ws::server::State::Connected) {
+            websocket_context.process();
         }
     });
+
+    return true;
+}
+
+auto Server::stop() -> void {
+    websocket_context.shutdown();
+    worker_thread.join();
+}
+} // namespace server
+
+auto run() -> bool {
+    ws::set_log_level(0xff);
+    auto server = server::Server();
+    ensure(server.init());
 
     auto client         = ws::client::Context();
     client.verbose      = true;
@@ -54,8 +95,7 @@ auto run() -> bool {
     }
     client.shutdown();
     client_thread.join();
-    server.shutdown();
-    server_thread.join();
+    server.stop();
 
     return true;
 }
