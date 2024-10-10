@@ -5,6 +5,7 @@ ws_files = files(
 
 ws_server_files = files(
   'server.cpp',
+  'server-common.cpp',
 )
 
 ws_client_files = files(
