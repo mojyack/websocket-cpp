@@ -2,8 +2,9 @@
 #include "server-common.hpp"
 
 namespace ws::server {
-using SessionDataInitializer = SessionDataInitializerCommon<lws>;
-using OnDataReceived         = void(lws* wsi, std::span<const std::byte> payload);
+using Client                 = lws;
+using SessionDataInitializer = SessionDataInitializerCommon<Client>;
+using OnDataReceived         = OnDataReceivedCommon<Client>;
 
 struct Context : ContextCommon {
     // public
@@ -11,10 +12,10 @@ struct Context : ContextCommon {
     std::unique_ptr<SessionDataInitializer> session_data_initer;
 
     auto init(const ContextParams& params) -> bool;
-    auto send(lws* wsi, std::span<const std::byte> payload) -> bool;
+    auto send(Client* client, std::span<const std::byte> payload) -> bool;
 
     ~Context();
 };
 
-auto wsi_to_userdata(lws* wsi) -> void*;
+auto client_to_userdata(Client* client) -> void*;
 } // namespace ws::server

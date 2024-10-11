@@ -15,7 +15,7 @@ struct SessionData {
 };
 
 struct SessionDataInitializer : ws::server::SessionDataInitializer {
-    auto alloc(lws* /*wsi*/) -> void* override {
+    auto alloc(ws::server::Client* /*client*/) -> void* override {
         return new SessionData{.a = -1, .b = 0, .c = true};
     }
 
@@ -33,11 +33,11 @@ struct Server {
 };
 
 auto Server::init() -> bool {
-    websocket_context.handler = [this](lws* wsi, std::span<const std::byte> payload) -> void {
-        auto& session = *std::bit_cast<SessionData*>(ws::server::wsi_to_userdata(wsi));
+    websocket_context.handler = [this](ws::server::Client* client, std::span<const std::byte> payload) -> void {
+        auto& session = *std::bit_cast<SessionData*>(ws::server::client_to_userdata(client));
         print("server received message: ", std::string_view((char*)payload.data(), payload.size()));
         print("session: a=", session.a, " b=", session.b, " c=", session.c);
-        websocket_context.send(wsi, to_span("ack"));
+        websocket_context.send(client, to_span("ack"));
     };
     websocket_context.session_data_initer.reset(new SessionDataInitializer());
     websocket_context.verbose      = true;

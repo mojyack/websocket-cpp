@@ -7,11 +7,14 @@
 namespace ws::server {
 template <class T>
 struct SessionDataInitializerCommon {
-    virtual auto alloc(T* session) -> void* = 0;
-    virtual auto free(void* ptr) -> void    = 0;
+    virtual auto alloc(T* client) -> void* = 0;
+    virtual auto free(void* ptr) -> void   = 0;
 
     virtual ~SessionDataInitializerCommon() {}
 };
+
+template <class T>
+using OnDataReceivedCommon = void(T* client, std::span<const std::byte> payload);
 
 enum class State {
     Connected,
