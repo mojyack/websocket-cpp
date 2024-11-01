@@ -38,7 +38,6 @@ struct ContextCommon {
     auto init_protocol(const ContextParams& params, size_t session_data_size, const void* session_callback) -> bool;
 
     // public
-    bool verbose      = false;
     bool dump_packets = false;
 
     auto process() -> bool;

@@ -3,6 +3,7 @@
 #include "macros/assert.hpp"
 #include "misc.hpp"
 #include "server.hpp"
+#include "util/logger.hpp"
 
 namespace ws::server {
 namespace {
@@ -11,11 +12,11 @@ struct SessionData {
     impl::SendBuffers send_buffers;
 };
 
+auto logger = Logger("ws");
+
 auto protocol_callback(lws* const wsi, const lws_callback_reasons reason, void* const user, void* const in, const size_t len) -> int {
     const auto ctx = std::bit_cast<Context*>(lws_context_user(lws_get_context(wsi)));
-    if(ctx->verbose) {
-        line_print("reason: ", reason);
-    }
+    logger.debug("reason=%d", reason);
 
     switch(reason) {
     case LWS_CALLBACK_RECEIVE: {

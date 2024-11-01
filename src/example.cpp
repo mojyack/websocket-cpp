@@ -40,7 +40,6 @@ auto Server::init() -> bool {
         websocket_context.send(client, to_span("ack"));
     };
     websocket_context.session_data_initer.reset(new SessionDataInitializer());
-    websocket_context.verbose      = true;
     websocket_context.dump_packets = true;
     ensure(websocket_context.init({
         .protocol    = "message",
