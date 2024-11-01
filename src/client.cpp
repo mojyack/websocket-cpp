@@ -22,7 +22,7 @@ auto ssl_level_to_flags(const SSLLevel level) -> int {
 
 auto callback(lws* wsi, lws_callback_reasons reason, void* const /*user*/, void* const in, const size_t len) -> int {
     const auto ctx = std::bit_cast<Context*>(lws_context_user(lws_get_context(wsi)));
-    logger.debug("reason=%d", reason);
+    logger.debug("reason=", reason);
 
     switch(reason) {
     case LWS_CALLBACK_CLIENT_ESTABLISHED:
