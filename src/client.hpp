@@ -44,7 +44,6 @@ struct Context {
     std::function<OnDataReceived> handler;
 
     // debug flags
-    bool verbose      = false;
     bool dump_packets = false;
 
     auto init(const ContextParams& params) -> bool;

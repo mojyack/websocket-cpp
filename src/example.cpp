@@ -70,7 +70,6 @@ auto run() -> bool {
     ensure(server.init());
 
     auto client         = ws::client::Context();
-    client.verbose      = true;
     client.dump_packets = true;
     client.handler      = [](std::span<const std::byte> payload) -> void {
         print("client received message: ", std::string_view((char*)payload.data(), payload.size()));
