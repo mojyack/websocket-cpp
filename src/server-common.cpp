@@ -1,10 +1,15 @@
 #include <libwebsockets.h>
 
-#include "macros/unwrap.hpp"
 #include "server-common.hpp"
+#include "util/logger.hpp"
+
+#define CUTIL_MACROS_PRINT_FUNC logger.error
+#include "macros/unwrap.hpp"
 
 namespace ws::server {
 namespace {
+auto logger = Logger("ws");
+
 auto http_callback(lws* const wsi, const lws_callback_reasons reason, void* const /*user*/, void* const /*in*/, const size_t /*len*/) -> int {
     switch(reason) {
     case LWS_CALLBACK_HTTP:

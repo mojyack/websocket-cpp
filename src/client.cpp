@@ -1,9 +1,11 @@
 #include <libwebsockets.h>
 
 #include "client.hpp"
-#include "macros/assert.hpp"
 #include "misc.hpp"
 #include "util/logger.hpp"
+
+#define CUTIL_MACROS_PRINT_FUNC logger.error
+#include "macros/assert.hpp"
 
 namespace ws::client {
 namespace {
