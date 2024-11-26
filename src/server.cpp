@@ -72,15 +72,23 @@ auto Context::init(const ContextParams& params) -> bool {
     return init_protocol(params, sizeof(SessionData), (void*)protocol_callback);
 }
 
-auto Context::send(Client* const client, std::span<const std::byte> payload) -> bool {
+auto Context::send(Client* const client, const std::span<const std::byte> payload) -> bool {
     if(dump_packets) {
-        line_print("<<< ", payload.size(), " bytes:");
+        line_print("<<< binary ", payload.size(), " bytes:");
         dump_hex(payload);
     }
     const auto base = (SessionData*)lws_wsi_user(client);
-    impl::push_to_send_buffers(base->send_buffers, payload);
-    lws_callback_on_writable(client);
-    lws_cancel_service_pt(client);
+    impl::push_to_send_buffers_and_cancel_service(base->send_buffers, payload, client);
+    return true;
+}
+
+auto Context::send(Client* const client, std::string_view payload) -> bool {
+    if(dump_packets) {
+        line_print("<<< text ", payload.size(), " bytes:");
+        print(payload);
+    }
+    const auto base = (SessionData*)lws_wsi_user(client);
+    impl::push_to_send_buffers_and_cancel_service(base->send_buffers, payload, client);
     return true;
 }
 

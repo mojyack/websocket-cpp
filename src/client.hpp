@@ -42,7 +42,6 @@ struct Context {
 
     // set by user
     std::function<OnDataReceived> handler;
-    bool                          text = false; // set true to indicate all packets are plain text
 
     // debug flags
     bool dump_packets = false;
@@ -50,6 +49,7 @@ struct Context {
     auto init(const ContextParams& params) -> bool;
     auto process() -> bool;
     auto send(std::span<const std::byte> payload) -> bool;
+    auto send(std::string_view payload) -> bool;
     auto shutdown() -> void;
 };
 } // namespace ws::client
