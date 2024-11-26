@@ -49,7 +49,8 @@ auto send_all_of_send_buffers(SendBuffers& send_buffers, lws* const wsi) -> bool
     for(const auto& packet : send_buffers.swap()) {
         const auto head = packet.data.data() + LWS_SEND_BUFFER_PRE_PADDING;
         const auto size = packet.data.size() - LWS_SEND_BUFFER_PRE_PADDING - LWS_SEND_BUFFER_POST_PADDING;
-        if(lws_write(wsi, std::bit_cast<unsigned char*>(head), size, packet.text ? LWS_WRITE_TEXT : LWS_WRITE_BINARY) != int(size)) {
+        const auto ret  = lws_write(wsi, std::bit_cast<unsigned char*>(head), size, packet.text ? LWS_WRITE_TEXT : LWS_WRITE_BINARY);
+        if(ret < int(size)) {
             return false;
         }
     }
