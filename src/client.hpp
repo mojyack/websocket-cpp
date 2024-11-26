@@ -42,6 +42,7 @@ struct Context {
 
     // set by user
     std::function<OnDataReceived> handler;
+    bool                          text = false; // set true to indicate all packets are plain text
 
     // debug flags
     bool dump_packets = false;
