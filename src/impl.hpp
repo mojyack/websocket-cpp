@@ -22,5 +22,5 @@ using SendBuffers = WritersReaderBuffer<std::vector<std::byte>>;
 auto append(std::vector<std::byte>& vec, void* in, size_t len) -> void;
 auto append_payload(lws* wsi, std::vector<std::byte>& buffer, void* const in, const size_t len) -> std::span<std::byte>;
 auto push_to_send_buffers(SendBuffers& send_buffers, std::span<const std::byte> payload) -> void;
-auto send_all_of_send_buffers(SendBuffers& send_buffers, lws* wsi) -> bool;
+auto send_all_of_send_buffers(SendBuffers& send_buffers, lws* wsi, int write_protocol = 1 /*LWS_WRITE_BINARY*/) -> bool;
 } // namespace ws::impl
