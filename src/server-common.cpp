@@ -1,9 +1,9 @@
 #include <libwebsockets.h>
 
+#include "macros/logger.hpp"
 #include "server-common.hpp"
-#include "util/logger.hpp"
 
-#define CUTIL_MACROS_PRINT_FUNC logger.error
+#define CUTIL_MACROS_PRINT_FUNC(...) LOG_ERROR(logger, __VA_ARGS__)
 #include "macros/unwrap.hpp"
 
 namespace ws::server {
