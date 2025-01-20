@@ -35,8 +35,8 @@ struct Server {
 auto Server::init() -> bool {
     websocket_context.handler = [this](ws::server::Client* client, std::span<const std::byte> payload) -> void {
         auto& session = *std::bit_cast<SessionData*>(ws::server::client_to_userdata(client));
-        print("server received message: ", std::string_view((char*)payload.data(), payload.size()));
-        print("session: a=", session.a, " b=", session.b, " c=", session.c);
+        PRINT("server received message: {}", std::string_view((char*)payload.data(), payload.size()));
+        PRINT("session: a={} b={} c={}", session.a, session.b, session.c);
         websocket_context.send(client, to_span("ack"));
     };
     websocket_context.session_data_initer.reset(new SessionDataInitializer());
@@ -71,7 +71,7 @@ auto run() -> bool {
     auto client         = ws::client::Context();
     client.dump_packets = true;
     client.handler      = [](std::span<const std::byte> payload) -> void {
-        print("client received message: ", std::string_view((char*)payload.data(), payload.size()));
+        PRINT("client received message: {}", std::string_view((char*)payload.data(), payload.size()));
     };
     ensure(client.init({
         .address   = "localhost",
@@ -87,7 +87,7 @@ auto run() -> bool {
         }
     });
     for(auto i = 0; i < 5; i += 1) {
-        const auto str = build_string("hello, ", i);
+        const auto str = std::format("hello, {}", i);
         client.send(to_span(str));
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }

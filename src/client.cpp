@@ -24,7 +24,7 @@ auto ssl_level_to_flags(const SSLLevel level) -> int {
 
 auto callback(lws* wsi, lws_callback_reasons reason, void* const /*user*/, void* const in, const size_t len) -> int {
     const auto ctx = std::bit_cast<Context*>(lws_context_user(lws_get_context(wsi)));
-    LOG_DEBUG(logger, "reason=", reason);
+    LOG_DEBUG(logger, "reason=", std::to_underlying(reason));
 
     switch(reason) {
     case LWS_CALLBACK_CLIENT_ESTABLISHED:
@@ -95,7 +95,7 @@ auto Context::init(const ContextParams& params) -> bool {
     context.reset(lws_create_context(&context_creation_info));
     ensure(context.get() != NULL);
 
-    const auto host                = build_string(params.address, ":", params.port);
+    const auto host                = std::format("{}:{}", params.address, params.port);
     const auto client_connect_info = lws_client_connect_info{
         .context                   = context.get(),
         .address                   = params.address,
@@ -125,7 +125,7 @@ auto Context::process() -> bool {
 
 auto Context::send(const std::span<const std::byte> payload) -> bool {
     if(dump_packets) {
-        PRINT("<<< binary ", payload.size(), " bytes:");
+        PRINT("<<< binary {} bytes:", payload.size());
         dump_hex(payload);
     }
     impl::push_to_send_buffers_and_cancel_service(send_buffers, payload, wsi);
@@ -134,8 +134,8 @@ auto Context::send(const std::span<const std::byte> payload) -> bool {
 
 auto Context::send(std::string_view payload) -> bool {
     if(dump_packets) {
-        PRINT("<<< text ", payload.size(), " bytes:");
-        print(payload);
+        PRINT("<<< text {} bytes:", payload.size());
+        std::println("{}", payload);
     }
     impl::push_to_send_buffers_and_cancel_service(send_buffers, payload, wsi);
     return true;

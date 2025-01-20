@@ -1,5 +1,6 @@
-#include <ctype.h>
+#include <array>
 
+#include <ctype.h>
 #include <libwebsockets.h>
 
 #include "misc.hpp"

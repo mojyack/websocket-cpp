@@ -18,7 +18,7 @@ auto logger = Logger("ws");
 
 auto protocol_callback(lws* const wsi, const lws_callback_reasons reason, void* const user, void* const in, const size_t len) -> int {
     const auto ctx = std::bit_cast<Context*>(lws_context_user(lws_get_context(wsi)));
-    LOG_DEBUG(logger, "reason=", reason);
+    LOG_DEBUG(logger, "reason=", std::to_underlying(reason));
 
     switch(reason) {
     case LWS_CALLBACK_RECEIVE: {
@@ -74,7 +74,7 @@ auto Context::init(const ContextParams& params) -> bool {
 
 auto Context::send(Client* const client, const std::span<const std::byte> payload) -> bool {
     if(dump_packets) {
-        PRINT("<<< binary ", payload.size(), " bytes:");
+        PRINT("<<< binary {} bytes:", payload.size());
         dump_hex(payload);
     }
     const auto base = (SessionData*)lws_wsi_user(client);
@@ -84,8 +84,8 @@ auto Context::send(Client* const client, const std::span<const std::byte> payloa
 
 auto Context::send(Client* const client, std::string_view payload) -> bool {
     if(dump_packets) {
-        PRINT("<<< text ", payload.size(), " bytes:");
-        print(payload);
+        PRINT("<<< text {} bytes:", payload.size());
+        std::println("{}", payload);
     }
     const auto base = (SessionData*)lws_wsi_user(client);
     impl::push_to_send_buffers_and_cancel_service(base->send_buffers, payload, client);
