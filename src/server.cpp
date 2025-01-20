@@ -18,12 +18,12 @@ auto logger = Logger("ws");
 
 auto protocol_callback(lws* const wsi, const lws_callback_reasons reason, void* const user, void* const in, const size_t len) -> int {
     const auto ctx = std::bit_cast<Context*>(lws_context_user(lws_get_context(wsi)));
-    LOG_DEBUG(logger, "reason=", std::to_underlying(reason));
+    LOG_DEBUG(logger, "reason={}", std::to_underlying(reason));
 
     switch(reason) {
     case LWS_CALLBACK_RECEIVE: {
         if(ctx->dump_packets) {
-            PRINT(">>> ", len, " bytes:");
+            PRINT(">>> {} bytes:", len);
             dump_hex({(std::byte*)in, len});
         }
         const auto payload = impl::append_payload(wsi, ctx->receive_buffer, in, len);
