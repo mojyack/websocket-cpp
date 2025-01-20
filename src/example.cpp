@@ -62,8 +62,9 @@ auto Server::stop() -> void {
     worker_thread.join();
 }
 } // namespace server
+} // namespace
 
-auto run() -> bool {
+auto main() -> int {
     ws::set_log_level(0xff);
     auto server = server::Server();
     ensure(server.init());
@@ -94,11 +95,5 @@ auto run() -> bool {
     client.shutdown();
     client_thread.join();
     server.stop();
-
-    return true;
-}
-} // namespace
-
-auto main() -> int {
-    return run() ? 0 : 1;
+    return 0;
 }
