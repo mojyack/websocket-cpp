@@ -23,7 +23,7 @@ auto protocol_callback(lws* const wsi, const lws_callback_reasons reason, void* 
     switch(reason) {
     case LWS_CALLBACK_RECEIVE: {
         if(ctx->dump_packets) {
-            PRINT(">>> {} bytes:", len);
+            PRINT("received {} bytes:", len);
             dump_hex({(std::byte*)in, len});
         }
         const auto payload = impl::append_payload(wsi, ctx->receive_buffer, in, len);
@@ -74,7 +74,7 @@ auto Context::init(const ContextParams& params) -> bool {
 
 auto Context::send(Client* const client, const std::span<const std::byte> payload) -> bool {
     if(dump_packets) {
-        PRINT("<<< binary {} bytes:", payload.size());
+        PRINT("sending {} bytes of binary:", payload.size());
         dump_hex(payload);
     }
     const auto base = (SessionData*)lws_wsi_user(client);
@@ -84,7 +84,7 @@ auto Context::send(Client* const client, const std::span<const std::byte> payloa
 
 auto Context::send(Client* const client, std::string_view payload) -> bool {
     if(dump_packets) {
-        PRINT("<<< text {} bytes:", payload.size());
+        PRINT("sending {} bytes of text:", payload.size());
         std::println("{}", payload);
     }
     const auto base = (SessionData*)lws_wsi_user(client);

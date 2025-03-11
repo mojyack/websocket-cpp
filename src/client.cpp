@@ -41,7 +41,7 @@ auto callback(lws* const wsi, const lws_callback_reasons reason, void* /*user*/,
         return -1;
     case LWS_CALLBACK_CLIENT_RECEIVE: {
         if(ctx->dump_packets) {
-            PRINT(">>> {} bytes:", len);
+            PRINT("received {} bytes:", len);
             dump_hex({(std::byte*)in, len});
         }
         const auto payload = impl::append_payload(wsi, ctx->receive_buffer, in, len);
@@ -125,7 +125,7 @@ auto Context::process() -> bool {
 
 auto Context::send(const std::span<const std::byte> payload) -> bool {
     if(dump_packets) {
-        PRINT("<<< binary {} bytes:", payload.size());
+        PRINT("sending {} bytes of binary:", payload.size());
         dump_hex(payload);
     }
     impl::push_to_send_buffers_and_cancel_service(send_buffers, payload, wsi);
@@ -134,7 +134,7 @@ auto Context::send(const std::span<const std::byte> payload) -> bool {
 
 auto Context::send(std::string_view payload) -> bool {
     if(dump_packets) {
-        PRINT("<<< text {} bytes:", payload.size());
+        PRINT("sending {} bytes of text:", payload.size());
         std::println("{}", payload);
     }
     impl::push_to_send_buffers_and_cancel_service(send_buffers, payload, wsi);
