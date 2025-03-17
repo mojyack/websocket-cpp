@@ -55,7 +55,7 @@ auto callback(lws* const wsi, const lws_callback_reasons reason, void* /*user*/,
         return 0;
     } break;
     case LWS_CALLBACK_CLIENT_WRITEABLE: {
-        ensure(impl::send_all_of_send_buffers(ctx->send_buffers, wsi), "failed to send buffers");
+        ensure(impl::send_one_from_send_buffer(ctx->send_buffers, wsi), "failed to send buffers");
         return 0;
     } break;
     case LWS_CALLBACK_EVENT_WAIT_CANCELLED:

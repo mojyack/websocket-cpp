@@ -1,6 +1,7 @@
 #include <libwebsockets.h>
 
 #include "impl.hpp"
+#include "macros/assert.hpp"
 #include "util/span.hpp"
 
 namespace ws::impl {
@@ -9,7 +10,8 @@ auto push_to_send_buffers(SendBuffers& send_buffers, const std::span<const std::
     auto data = std::vector<std::byte>(LWS_SEND_BUFFER_PRE_PADDING + payload.size() + LWS_SEND_BUFFER_POST_PADDING);
     auto head = data.data() + LWS_SEND_BUFFER_PRE_PADDING;
     memcpy(head, payload.data(), payload.size());
-    send_buffers.push({std::move(data), text});
+    auto [lock, buf] = send_buffers.access();
+    buf.push({std::move(data), text});
 }
 } // namespace
 
@@ -45,14 +47,24 @@ auto push_to_send_buffers_and_cancel_service(SendBuffers& send_buffers, const st
     lws_cancel_service_pt(wsi);
 }
 
-auto send_all_of_send_buffers(SendBuffers& send_buffers, lws* const wsi) -> bool {
-    for(const auto& packet : send_buffers.swap()) {
-        const auto head = packet.data.data() + LWS_SEND_BUFFER_PRE_PADDING;
-        const auto size = packet.data.size() - LWS_SEND_BUFFER_PRE_PADDING - LWS_SEND_BUFFER_POST_PADDING;
-        const auto ret  = lws_write(wsi, std::bit_cast<unsigned char*>(head), size, packet.text ? LWS_WRITE_TEXT : LWS_WRITE_BINARY);
-        if(ret < int(size)) {
-            return false;
+auto send_one_from_send_buffer(SendBuffers& send_buffers, lws* const wsi) -> bool {
+    auto packet = OutgoingPacket();
+    auto empty  = false;
+    {
+        auto [lock, buf] = send_buffers.access();
+        if(buf.empty()) {
+            return true;
         }
+        packet = std::move(buf.front());
+        buf.pop();
+        empty = buf.empty();
+    }
+    const auto head = packet.data.data() + LWS_SEND_BUFFER_PRE_PADDING;
+    const auto size = packet.data.size() - LWS_SEND_BUFFER_PRE_PADDING - LWS_SEND_BUFFER_POST_PADDING;
+    const auto ret  = lws_write(wsi, std::bit_cast<unsigned char*>(head), size, packet.text ? LWS_WRITE_TEXT : LWS_WRITE_BINARY);
+    ensure(ret >= int(size));
+    if(!empty) {
+        lws_callback_on_writable(wsi);
     }
     return true;
 }
