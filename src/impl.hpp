@@ -4,10 +4,7 @@
 #include <vector>
 
 #include "macros/autoptr.hpp"
-
-#define CUTIL_NS ws::impl
 #include "util/critical.hpp"
-#undef CUTIL_NS
 
 // libwebsockets
 extern "C" {
